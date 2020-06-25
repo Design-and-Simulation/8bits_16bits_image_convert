@@ -1,26 +1,29 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 16bit转8bit代码—— gamma曲线映射
-% 参数：
-%   img_dir：待转换的16位图像路径
-%   img_savedir：转换完成后的8位图像保存路径
-% 修改：
-%   zzh 20190729
+% 16 bits to 8bits converting： by gamma transformation
+% 
+% parameters:
+%   imdir: dir for original images(16bits)
+%   img_savedir: dir for converted images(8bits)
+%	src_datatype: src image data type
+%	dst_datatype: dst image data type
+% 
+% modified: Zhihong Zhang 20190912
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%% 初始化环境
+%% initialize the environment
 clc
 clear
 
-%% 参数设置
-% img_dir = '/home/f305c/Documents/dataset/denoise_dataset/DIV2K/DIV2K_EMCCD_16BIT/LQ2/1/'; 
-% img_savedir = '/home/f305c/Documents/dataset/denoise_dataset/DIV2K/DIV2K_EMCCD_8BIT/LQ2/1/';
+%% params
+img_dir = '..\test_data\16bit_noise_data\';
+img_savedir = '..\test_data\8bit_noise_data\';
+% img_dir = '..\test_data\16bit_data\';
+% img_savedir = '..\test_data\test\';
+src_datatype = '*.tif';
+dst_datatype = '.png';
+% dst_datatype = '.tif';
 
-img_dir = 'C:\Users\BBNC\Desktop\trash\test_pic\16bit\';
-img_savedir = 'C:\Users\BBNC\Desktop\trash\test_pic\8bit\';
-RESCALE_FLAG  = 1; %
-
-
-%% 加载映射表
+%% load mapping table
 load('map_ch1.mat');
 load('map_ch2.mat');
 load('map_ch3.mat');
@@ -32,8 +35,8 @@ idx = (find(~isnan(map_ch3)));
 map_ch3 = spline(idx, map_ch3(idx), 1:65536);
 
 
-%% 图像处理
-img_list = dir([img_dir, '*.png']); %原图文件格式 .png or tif格式
+%% convert
+img_list = dir([img_dir, src_datatype]); 
 img_names = {img_list.name};
 img_num = length(img_names);
 
@@ -41,7 +44,6 @@ for k = 1:img_num
     strImgFilename = img_names{k};
     ppm_test = imread([img_dir, strImgFilename]); % original image
     
-    ppm_test = ppm_test * scale_ratio;
     
     [h,w,c]=size(ppm_test);
     img_jpg=zeros(h,w,c);
@@ -73,10 +75,17 @@ for k = 1:img_num
         end
     end
     img_jpg = uint8(img_jpg);
-    new_img_name = sprintf('%04d', str2double(strImgFilename(1:end-4)));
-    imwrite(img_jpg, [img_savedir, new_img_name, '.png'],'png')  % 保存为png格式
-%     figure(2)
-%     imshow(raw_img)
+	
+	% convert to gray
+% 	if ~ismatrix(img_jpg)
+% 		img_jpg = rgb2gray(img_jpg);
+% 	end
+
+	% save data
+% 	save_name = [img_savedir, sprintf('%04d', k), dst_datatype];
+	save_name = [img_savedir, strImgFilename(1:end-4), dst_datatype];
+    imwrite(img_jpg, save_name)
+
     if mod(k,100)==0
         fprintf("%.f%% done!\n", 100*k/img_num)
     end 

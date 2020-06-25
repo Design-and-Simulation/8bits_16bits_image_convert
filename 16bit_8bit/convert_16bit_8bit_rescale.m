@@ -1,9 +1,13 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 16 bits to 8bits converting£º by truncate and rescale
+% 
 % parameters:
 %   imdir: dir for original images(16bits)
 %   img_savedir: dir for converted images(8bits)
-% modified: zzh_20190912
+%	src_datatype: src image data type
+%	dst_datatype: dst image data type
+% 
+% modified: Zhihong Zhang 20190912
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% initialize the environment
@@ -11,15 +15,18 @@ clc
 clear
 
 %% parameters
-img_dir = 'C:\Users\BBNC\Desktop\trash\test_pic\HQ_16bit/';
-img_savedir = 'C:\Users\BBNC\Desktop\trash\test_pic\HQ_8bit/';
-
+img_dir = '..\test_data\16bit_noise_data\';
+img_savedir = '..\test_data\8bit_noise_data\';
+% img_dir = '..\test_data\16bit_data\';
+% img_savedir = '..\test_data\test\';
+src_datatype = '*.tif';
+dst_datatype = '.tif';
 
 %% converting
-img_list = dir([img_dir, '*.png']); 
+img_list = dir([img_dir, src_datatype]); 
 img_names = {img_list.name};
 img_num = length(img_names);
-X_LOW = 0; X_HIGH=21800; Y_LOW=0; Y_HIGH = 255;
+X_LOW = 0; X_HIGH=65535; Y_LOW=0; Y_HIGH = 255;
 
 for k = 1:img_num
     strImgFilename = img_names{k};
@@ -28,9 +35,12 @@ for k = 1:img_num
     cvt = piecewise_linear_tfrom(double(origin), X_LOW, X_HIGH, Y_LOW, Y_HIGH); % converted result
     
     cvt_8bit = uint8(cvt);
-    imwrite(cvt_8bit, [img_savedir, strImgFilename(1:end-4), '.png'],'png')
-%     figure(2)
-%     imshow(raw_img)
+	
+	% save data
+% 	save_name = [img_savedir, sprintf('%04d', k), dst_datatype];
+	save_name = [img_savedir, strImgFilename(1:end-4), dst_datatype];
+    imwrite(cvt_8bit, save_name)
+
     if mod(k,100)==0
         fprintf("%.f%% done!\n", 100*k/img_num)
     end 

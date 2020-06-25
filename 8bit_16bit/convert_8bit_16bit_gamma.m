@@ -1,21 +1,26 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 8bit转16bit 代码
-% 参数：
-%   img_dir：待转换的8位png格式图像路径
-%   img_savedir：转换完成后的16位png图像保存路径
-% 修改：
-%   zzh 20190715
+% 16 bits to 8bits converting： by gamma transformation
+% 
+% parameters:
+%   imdir: dir for original images (8bits)
+%   img_savedir: dir for converted images (16bits)
+%	src_datatype: src image data type
+%	dst_datatype: dst image data type
+% 
+% modified: Zhihong Zhang 20190912
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%% 初始化环境
+%% init
 clc
 clear
 
-%% 参数设置
-img_dir = '..\test_data\8bit_data_1\'; %原图文件夹
-img_savedir = '..\test_data\16bit_data\'; %保存文件夹
+%% params setting
+img_dir = '..\test_data\8bit_data\'; % src dir
+img_savedir = '..\test_data\16bit_data\'; % dist dir
+src_datatype = '*.png';
+dst_datatype = '.tif'; % for 16bit RGB image, 'tif' is needed
 
-%% 生成 r g b映射表
+%% generating 'r g b' mapping table
 % load('map_ch1.mat');
 % load('map_ch2.mat');
 % load('map_ch3.mat');    
@@ -40,11 +45,11 @@ img_savedir = '..\test_data\16bit_data\'; %保存文件夹
 % save('g.mat', 'g');
 % save('b.mat', 'b');
 
-%% 图像转换
+%% convert
 load('r.mat');
 load('g.mat');
 load('b.mat');
-img_list = dir([img_dir, '*.png']); %原图文件格式 3通道RGB .png格式
+img_list = dir([img_dir, src_datatype ]); 
 img_names = {img_list.name};
 img_num = length(img_names);
 
@@ -76,9 +81,8 @@ for k = 1:img_num
     new_img=uint16(new_img);
     raw_img(:,:,:)=new_img(:,:,:)*255;
     raw_img=uint16(raw_img);
-    imwrite(raw_img, [img_savedir, name(1:end-4), '.png'],'png')
-%     figure(2)
-%     imshow(raw_img)
+    imwrite(raw_img, [img_savedir, name(1:end-4), dst_datatype])
+
     if mod(k,100)==0
         fprintf("%.f%% done!\n", 100*k/img_num)
     end    

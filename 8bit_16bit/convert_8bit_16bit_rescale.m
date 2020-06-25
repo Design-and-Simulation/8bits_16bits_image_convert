@@ -1,9 +1,13 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 16 bits to 8bits converting： by truncate and rescale
+% 8bits to 16bits converting： by truncate and rescale
+% 
 % parameters:
-%   imdir: dir for original images(16bits)
-%   img_savedir: dir for converted images(8bits)
-% modified: zzh_20190912
+%   imdir: dir for original images (8bits)
+%   img_savedir: dir for converted images (16bits)
+%	src_datatype: src image data type
+%	dst_datatype: dst image data type
+% 
+% modified: Zhihong Zhang 20190912
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% initialize the environment
@@ -11,12 +15,13 @@ clc
 clear
 
 %% parameters
-img_dir = '..\test_data\8bit_data_1\'; %原图文件夹
-img_savedir = '..\test_data\16bit_data\'; %保存文件夹
-
+img_dir = '..\test_data\8bit_data\'; % src dir 
+img_savedir = '..\test_data\16bit_data\'; % dist dir
+src_datatype = '*.png';
+dst_datatype = '.tif'; % for 16bit RGB image, 'tif' is needed
 
 %% converting
-img_list = dir([img_dir, '*.png']); 
+img_list = dir([img_dir, src_datatype ]); 
 img_names = {img_list.name};
 img_num = length(img_names);
 X_LOW = 0; X_HIGH=255; Y_LOW=0; Y_HIGH = 65535;
@@ -28,9 +33,7 @@ for k = 1:img_num
     cvt = piecewise_linear_tfrom(double(origin), X_LOW, X_HIGH, Y_LOW, Y_HIGH); % converted result
     
     cvt_8bit = uint16(cvt);
-    imwrite(cvt_8bit, [img_savedir, strImgFilename(1:end-4), '.png'],'png')
-%     figure(2)
-%     imshow(raw_img)
+	imwrite(cvt_8bit, [img_savedir, strImgFilename(1:end-4), dst_datatype])
     if mod(k,100)==0
         fprintf("%.f%% done!\n", 100*k/img_num)
     end 
